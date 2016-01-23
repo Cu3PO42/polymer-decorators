@@ -117,7 +117,10 @@ declare var Polymer: {
 }
 
 function extend(dest, src) {
-    for (let prop of src) {
+    if (src === undefined || src === null) {
+        return dest;
+    }
+    for (let prop in src) {
         if (src.hasOwnProperty(prop)) {
             dest[prop] = src[prop];
         }
@@ -140,6 +143,9 @@ export function component(name: string, extendsTag?: string): ClassDecorator {
                 this.extends = extendsTag;
             }
         }
+        if (klass.prototype.factoryImpl !== undefined)
+            throw new Error("Do not use factoryImpl(), use constructor() instead");
+        klass.prototype.factoryImpl = klass;
         return klass;
     }
 }
@@ -177,4 +183,21 @@ export function listen(eventName: string) {
 		target.listeners = target.listeners || {};
 		target.listeners[eventName] = propertyKey;
 	}
+}
+
+export function computed(ob?: Property) {
+   return (target: Element, computedFuncName: string) => {
+      target.properties = target.properties || {};
+      ob = ob || {};
+      if (Reflect.hasMetadata("design:returntype", target, computedFuncName))
+        ob.type = Reflect.getMetadata("design:returntype", target, computedFuncName);
+      var getterName = "get_computed_" + computedFuncName;
+      var funcText: string = target[computedFuncName].toString();
+      var start = funcText.indexOf("(");
+      var end = funcText.indexOf(")");
+      var propertiesList = funcText.substring(start+1,end);
+      ob["computed"] = getterName + "(" + propertiesList + ")";
+      target.properties[computedFuncName] = ob;
+      target[getterName] = target[computedFuncName];
+   }
 }
