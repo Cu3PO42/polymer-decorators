@@ -1,0 +1,31 @@
+{
+  "name": "polymer-decorators",
+  "version": "0.0.0",
+  "description": "ES7/TypeScript decorators to facilitate creation of Polymer elements.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cu3PO42/polymer-decorators.git"
+  },
+  "keywords": [
+    "polymer",
+    "typescript",
+    "decorator",
+    "annotation",
+    "es7",
+    "element",
+    "webcomponents"
+  ],
+  "author": "Cu3PO42",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Cu3PO42/polymer-decorators/issues"
+  },
+  "homepage": "https://github.com/Cu3PO42/polymer-decorators#readme",
+  "dependencies": {
+    "reflect-metadata": "^0.1.3"
+  }
+}
