@@ -128,8 +128,11 @@ function extend(dest, src) {
     return dest;
 }
 
-export function component(name: string, extendsTag?: string): ClassDecorator {
+export function component(name?: string, extendsTag?: string): ClassDecorator {
     return (klass) => {
+        if (name === undefined) {
+            name = (<string>klass.name).match(/[A-Z][a-z]*/g).map((e) => e.toLowerCase()).join("-");
+        }
         if (klass.prototype.beforeRegister !== undefined) {
             var beforeRegister = klass.prototype.beforeRegister;
             klass.prototype.beforeRegister = function() {
@@ -143,9 +146,6 @@ export function component(name: string, extendsTag?: string): ClassDecorator {
                 this.extends = extendsTag;
             }
         }
-        if (klass.prototype.factoryImpl !== undefined)
-            throw new Error("Do not use factoryImpl(), use constructor() instead");
-        klass.prototype.factoryImpl = klass;
         return klass;
     }
 }
