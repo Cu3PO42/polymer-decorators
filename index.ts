@@ -129,16 +129,18 @@ function extendObj(dest, src) {
 }
 
 export function component<TFunction extends Function>(klass: TFunction): TFunction;
-export function component(name?: string, extendsTag?: string): ClassDecorator;
-export function component(first?: any, second?: any): any {
+export function component(name?: string, extendsTag?: string, register?: boolean): ClassDecorator;
+export function component(first?: any, extendsTag?: string, register?: boolean): any {
     var name: string = undefined;
-    var extendsTag: string = undefined;
     var isGenerator = false;
 
     if (typeof first === "string" || first instanceof String || first === undefined) {
         name = first;
-        extendsTag = second;
         isGenerator = true;
+    }
+
+    if (register === undefined) {
+        register = true;
     }
 
     function decorate(klass) {
@@ -171,6 +173,9 @@ export function component(first?: any, second?: any): any {
                 return behaviors;
             } });
 
+        }
+        if (register) {
+            Polymer(klass);
         }
         return klass;
     }
