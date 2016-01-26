@@ -1,6 +1,6 @@
 {
   "name": "polymer-decorators",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "ES7/TypeScript decorators to facilitate creation of Polymer elements.",
   "main": "index.js",
   "scripts": {
@@ -27,5 +27,6 @@
   "homepage": "https://github.com/Cu3PO42/polymer-decorators#readme",
   "dependencies": {
     "reflect-metadata": "^0.1.3"
-  }
+  },
+  "devDependencies": {}
 }
