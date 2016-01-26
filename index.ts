@@ -104,7 +104,7 @@ interface Property {
 }
 
 // Polymer object
-declare var Polymer: {
+export declare var Polymer: {
    (prototype: Element): FunctionConstructor;
    Class(prototype: Element): Function;
    dom: dom;
@@ -133,6 +133,12 @@ export function component(name?: string, extendsTag?: string): ClassDecorator {
         if (name === undefined) {
             name = (<string>klass.name).match(/[A-Z][a-z]*/g).map((e) => e.toLowerCase()).join("-");
         }
+        if (extendsTag === undefined) {
+            extendsTag = klass.extends;
+        }
+        if (klass.extends !== undefined) {
+            delete klass.extends;
+        }
         if (klass.prototype.beforeRegister !== undefined) {
             var beforeRegister = klass.prototype.beforeRegister;
             klass.prototype.beforeRegister = function() {
@@ -146,7 +152,28 @@ export function component(name?: string, extendsTag?: string): ClassDecorator {
                 this.extends = extendsTag;
             }
         }
+        var behaviors = klass.behaviors;
+        if (behaviors !== undefined) {
+            delete klass.behaviors;
+            Object.defineProperty(klass.prototype, "behaviors", { get: function() {
+                return behaviors;
+            } });
+
+        }
         return klass;
+    }
+}
+
+export function extends(tag: string): ClassDecorator {
+    return (klass) => {
+        klass.extends = tag;
+    }
+}
+
+export function behavior(behavior): ClassDecorator {
+    return (klass) => {
+        klass.behaviors = klass.behaviors || [];
+        klass.behaviors.push(behavior);
     }
 }
 
