@@ -21,9 +21,7 @@ Please enable the compiler option emitDecoratorMetadata to enable type inference
 
 ### `@component(name, extends, autoRegister)`
 
-Declares a class a component. It can take up to three parameters, the first being the name of the component and the second being the element it extends, and a toggle to disable auto-registering the element. All are **optional**. If the second parameter isn't present, the component will not inherit any other component, if the first is not present, the name will be inferred from the class name. The third parameter defaults to `true` and will disable auto-registering the element with Polymer if set to `false`. If you don't specify any option, you can use `component` as a decorator directly and not as a factory.
-
-The following are all valid:
+Declares a class a component. It can take up to three parameters, the first being the name of the component and the second being the element it extends, and a toggle to disable auto-registering the element. All but the first are are **optional**. If the second parameter isn't present, the component will not inherit any other component. The third parameter defaults to `true` and will disable auto-registering the element with Polymer if set to `false`. If you don't specify any option, you can use `component` as a decorator directly and not as a factory.
 
 ```javascript
 @component("my-element")
@@ -36,12 +34,7 @@ class MyLink extends PolymerElement {
      /* ... */
 }
 
-@component()
-class MyElement extends PolymerElement {
-     /* ... */
-}
-
-@component
+@component("my-element", undefined, false)
 class MyElement extends PolymerElement {
      /* ... */
 }
@@ -155,4 +148,8 @@ I mean, really, why would you want to specify this twice? You can instead write:
 name: string;
 ```
 
-And it does the exact same thing. By default elements are also auto-registered. I think the cases where you want this are more common than those when you don't want that. Also nothing is exported to the global namespace - you can import everything as you want it. However there is also one feature that was removed: overloading of the constructor. Unfortunately this functionality cannot be provided with classes in ES6, so I removed it for consistency. Please remember that by default if you give instance variables default values, the TypeScript compiler will put theses into the constructor, so they will not be set in your Polymer elements. Instead define an `attached` method and do all your initialization work there.
+And it does the exact same thing.  
+By default elements are also auto-registered. I think the cases where you want this are more common than those when you don't want that.  
+Also nothing is exported to the global namespace - you can import everything as you want it.  
+However there is also one feature that was removed: overloading of the constructor. Unfortunately this functionality cannot be provided with classes in ES6, so I removed it for consistency. Please remember that by default if you give instance variables default values, the TypeScript compiler will put theses into the constructor, so they will not be set in your Polymer elements. Instead define an `attached` method and do all your initialization work there.  
+Generally this follows the Polymer guidelines for creating elements with ES6 classes a lot more closely.

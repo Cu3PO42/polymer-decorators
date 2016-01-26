@@ -104,7 +104,7 @@ export interface Property {
 }
 
 // Polymer object
-export declare var Polymer: {
+declare var Polymer: {
    (prototype: Element): FunctionConstructor;
    Class(prototype: Element): Function;
    dom: dom;
@@ -116,37 +116,12 @@ export declare var Polymer: {
    Base: any;
 }
 
-function extendObj(dest, src) {
-    if (src === undefined || src === null) {
-        return dest;
-    }
-    for (let prop in src) {
-        if (src.hasOwnProperty(prop)) {
-            dest[prop] = src[prop];
-        }
-    }
-    return dest;
-}
-
-export function component<TFunction extends Function>(klass: TFunction): TFunction;
-export function component(name?: string, extendsTag?: string, register?: boolean): ClassDecorator;
-export function component(first?: any, extendsTag?: string, register?: boolean): any {
-    var name: string = undefined;
-    var isGenerator = false;
-
-    if (typeof first === "string" || first instanceof String || first === undefined) {
-        name = first;
-        isGenerator = true;
-    }
-
+export function component(name: string, extendsTag?: string, register?: boolean): ClassDecorator {
     if (register === undefined) {
         register = true;
     }
 
-    function decorate(klass) {
-        if (name === undefined) {
-            name = (<string>klass.name).match(/[A-Z][a-z]*/g).map((e) => e.toLowerCase()).join("-");
-        }
+    return function (klass) {
         if (extendsTag === undefined) {
             extendsTag = klass.extends;
         }
@@ -179,11 +154,12 @@ export function component(first?: any, extendsTag?: string, register?: boolean):
         }
         return klass;
     }
+}
 
-    if (isGenerator) {
-        return decorate;
-    } else {
-        return decorate(first);
+export function extend(tagName: string): ClassDecorator {
+    return function(klass) {
+        klass.extends = tagName;
+        return klass;
     }
 }
 
@@ -203,13 +179,15 @@ export function property(first?: any, second?: any): any {
     if (second === undefined) {
         args = first || {};
         isGenerator = true;
+    } else {
+        args = {};
     }
 
     function decorate(target: any, key: string): void {
         if (Reflect.hasMetadata("design:type", target, key))
             args.type = Reflect.getMetadata("design:type", target,key);
         target.properties = target.properties || {};
-        target.properties[key] = Object.assign(args, target.properties[key]);
+        target.properties[key] = Object.assign(args, target.properties[key] || {});
     };
 
     if (isGenerator) {
