@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-declare class PolymerBase extends HTMLElement implements Element {
+export declare class PolymerBase extends HTMLElement implements Element {
    $: any;
    $$: any;
 
@@ -58,7 +58,7 @@ declare class PolymerBase extends HTMLElement implements Element {
 
 export var PolymerElement: typeof PolymerBase = <any>class {};
 
-interface dom
+export interface dom
 {
   (node: HTMLElement): HTMLElement;
   (node: PolymerBase): HTMLElement;
@@ -66,7 +66,7 @@ interface dom
 }
 
 // options for the fire method
-interface FireOptions
+export interface FireOptions
 {
   node?: HTMLElement|PolymerBase;
   bubbles?: boolean;
@@ -74,7 +74,7 @@ interface FireOptions
 }
 
 // members that can be optionally implemented in an element
-interface Element {
+export interface Element {
   properties?: Object;
   listeners?: Object;
   behaviors?: Object[];
@@ -92,7 +92,7 @@ interface Element {
   prototype?: Object;
 }
 
-interface Property {
+export interface Property {
   name?: string;
   type?: any;
   value?: any;
