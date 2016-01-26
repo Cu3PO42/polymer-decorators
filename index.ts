@@ -116,7 +116,7 @@ export declare var Polymer: {
    Base: any;
 }
 
-function extend(dest, src) {
+function extendObj(dest, src) {
     if (src === undefined || src === null) {
         return dest;
     }
@@ -128,8 +128,20 @@ function extend(dest, src) {
     return dest;
 }
 
-export function component(name?: string, extendsTag?: string): ClassDecorator {
-    return (klass) => {
+export function component<TFunction extends Function>(klass: TFunction): TFunction;
+export function component(name?: string, extendsTag?: string): ClassDecorator;
+export function component(first?: any, second?: any): any {
+    var name: string = undefined;
+    var extendsTag: string = undefined;
+    var isGenerator = false;
+
+    if (typeof first === "string" || first instanceof String || first === undefined) {
+        name = first;
+        extendsTag = second;
+        isGenerator = true;
+    }
+
+    function decorate(klass) {
         if (name === undefined) {
             name = (<string>klass.name).match(/[A-Z][a-z]*/g).map((e) => e.toLowerCase()).join("-");
         }
@@ -162,11 +174,11 @@ export function component(name?: string, extendsTag?: string): ClassDecorator {
         }
         return klass;
     }
-}
 
-export function extends(tag: string): ClassDecorator {
-    return (klass) => {
-        klass.extends = tag;
+    if (isGenerator) {
+        return decorate;
+    } else {
+        return decorate(first);
     }
 }
 
@@ -177,14 +189,29 @@ export function behavior(behavior): ClassDecorator {
     }
 }
 
-export function property(args: Property): PropertyDecorator {
-    return (target, key: string) => {
-        args = args || {};
+export function property(args?: Property): PropertyDecorator;
+export function property(target: Object, key: string | symbol): void;
+export function property(first?: any, second?: any): any {
+    var args;
+    var isGenerator = false;
+
+    if (second === undefined) {
+        args = first || {};
+        isGenerator = true;
+    }
+
+    function decorate(target: any, key: string): void {
         if (Reflect.hasMetadata("design:type", target, key))
             args.type = Reflect.getMetadata("design:type", target,key);
         target.properties = target.properties || {};
-        target.properties[key] = extend(args, target.properties[key]);
+        target.properties[key] = Object.assign(args, target.properties[key]);
     };
+
+    if (isGenerator) {
+        return decorate;
+    } else {
+        return decorate(first, second);
+    }
 }
 
 export function observe(observedProps: string) {
@@ -212,19 +239,35 @@ export function listen(eventName: string) {
 	}
 }
 
-export function computed(ob?: Property) {
-   return (target: Element, computedFuncName: string) => {
-      target.properties = target.properties || {};
-      ob = ob || {};
-      if (Reflect.hasMetadata("design:returntype", target, computedFuncName))
-        ob.type = Reflect.getMetadata("design:returntype", target, computedFuncName);
-      var getterName = "get_computed_" + computedFuncName;
-      var funcText: string = target[computedFuncName].toString();
-      var start = funcText.indexOf("(");
-      var end = funcText.indexOf(")");
-      var propertiesList = funcText.substring(start+1,end);
-      ob["computed"] = getterName + "(" + propertiesList + ")";
-      target.properties[computedFuncName] = ob;
-      target[getterName] = target[computedFuncName];
+export function computed(args?: Property): MethodDecorator;
+export function computed(target: Element, computedFuncName: string): void;
+export function computed(first?: any, second?: any): any {
+    var args;
+    var isGenerator = false;
+
+    if (second === undefined) {
+        args = first;
+        isGenerator = true;
+    }
+
+    function decorate(target: Element, computedFuncName: string) {
+        target.properties = target.properties || {};
+        args = args || {};
+        if (Reflect.hasMetadata("design:returntype", target, computedFuncName))
+            args.type = Reflect.getMetadata("design:returntype", target, computedFuncName);
+        var getterName = "get_computed_" + computedFuncName;
+        var funcText: string = target[computedFuncName].toString();
+        var start = funcText.indexOf("(");
+        var end = funcText.indexOf(")");
+        var propertiesList = funcText.substring(start+1,end);
+        args["computed"] = getterName + "(" + propertiesList + ")";
+        target.properties[computedFuncName] = args;
+        target[getterName] = target[computedFuncName];
+   }
+
+   if (isGenerator) {
+       return decorate;
+   } else {
+       return decorate(first, second);
    }
 }
