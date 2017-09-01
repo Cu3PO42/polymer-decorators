@@ -1,6 +1,9 @@
 # Polymer Decorators
 
-Another way to write Polymer Elements in TypeScript.
+Another way to write Polymer 1.x Elements in ESNext with Babel or TypeScript.
+
+The project is currently not actively maintained since I no longer use Polymer on a project.
+If you want to get involved in Polymer 2.0 support, please get in touch.
 
 ## Justification
 
@@ -45,7 +48,7 @@ class MyElement extends PolymerElement {
 Makes a component inherit another component - at the time of writing Polymer only supports extending native elements. Must always be used after the `@component` decorator.
 
 ```javascript
-@component
+@component("my-link")
 @extends("a")
 class MyLink extends PolymerElement {
      /* ... */
@@ -57,7 +60,7 @@ class MyLink extends PolymerElement {
 Add a behavior to your class. Must always be used after the `@component` decorator. Do note that this will not add the proper type definitions to your class. Methods and properties defined through the behavior will not be known to the TypeScript compiler. This will presumably resolved when mixins are available in a standardized way, implemented by the TypeScript compiler and supported by Polymer.
 
 ```javascript
-@component
+@component("my-element")
 @behavior(MyBehavior)
 class MyElement extends PolymerElement {
      /* ... */
@@ -69,7 +72,7 @@ class MyElement extends PolymerElement {
 Declares a class member as a property. It accepts an options object identical to the one that you pass to Polymer in the `properties` section when defining an element in standard Polymer-style. If using TypeScript you can however omit the type, it will be automatically inferred (given that you enabled `emitDecoratorMetadata`). If the object is empty, you may omit it - and in fact omit the calling parenthesis.
 
 ```javascript
-@component
+@component("my-element")
 class MyElement extends PolymerElement {
      @property({type: String})
      firstname: string;
@@ -84,7 +87,7 @@ class MyElement extends PolymerElement {
 This decorator lets a function observe changes to properties. Simply specify all properties you want to observe as a string, seperated by commas. If you only specify a single property (that is not a path), your function will receive two values: the value the property was changed to and the value it has previously. If specifying more or a property with a path, your function will receive the new values of all of the properties. Note: this handler will be called once when the element is created.
 
 ```javascript
-@component
+@component("my-element")
 class MyElement extends PolymerElement {
      @property
      firstname: string;
@@ -105,7 +108,7 @@ class MyElement extends PolymerElement {
 This decorator will change a function into a computed property. It takes almost the same options argument as the `@property` decorator. The single difference is that when specifyinv the `computed` property, it will not take a "function call" in string form, but only the arguments to that call, i.e. the names of the properties your function takes as arguments. The options may also be omitted, in that case the properties to pass in will be inferred from your function signature. You may want to specify the arguments manually if you plan to minify your code.
 
 ```javascript
-@component
+@component("my-element")
 class MyElement extends PolymerElement {
      @property
      firstname: string;
@@ -125,7 +128,7 @@ class MyElement extends PolymerElement {
 Make a function listen to an event on your element. This decorator takes the event name as a parameter. Your function will not receive any arguments.
 
 ```javascript
-@component
+@component("my-element")
 class MyElement extends PolymerElement {
      @listen("my-event")
      handleMyEvent() { /* ... */ }
