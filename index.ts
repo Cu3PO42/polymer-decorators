@@ -189,7 +189,7 @@ export function property(first?: any, second?: any): any {
         if (Reflect.hasMetadata("design:type", target, key))
             args.type = Reflect.getMetadata("design:type", target,key);
         target.properties = target.properties || {};
-        target.properties[key] = Object.assign(args, target.properties[key] || {});
+        target.properties[key] = (Object as any).assign(args, target.properties[key] || {});
     };
 
     if (isGenerator) {
