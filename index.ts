@@ -8,6 +8,8 @@ export declare class PolymerBase extends HTMLElement implements Element {
    shadyRoot:HTMLElement;
    style:CSSStyleDeclaration;
    customStyle:{[property:string]:string;};
+   extends?:Object[];
+   behaviors?:Object[];
 
    arrayDelete(path: string, item: string|any):any;
    async(callback: Function, waitTime?: number):any;
@@ -123,10 +125,10 @@ export function component(name: string, extendsTag?: string, register?: boolean)
 
     return function (klass) {
         if (extendsTag === undefined) {
-            extendsTag = klass.extends;
+            extendsTag = (klass as any).extends;
         }
-        if (klass.extends !== undefined) {
-            delete klass.extends;
+        if ((klass as any).extends !== undefined) {
+            delete (klass as any).extends;
         }
         if (klass.prototype.beforeRegister !== undefined) {
             var beforeRegister = klass.prototype.beforeRegister;
@@ -141,16 +143,16 @@ export function component(name: string, extendsTag?: string, register?: boolean)
                 this.extends = extendsTag;
             }
         }
-        var behaviors = klass.behaviors;
+        var behaviors = (klass as any).behaviors;
         if (behaviors !== undefined) {
-            delete klass.behaviors;
+            delete (klass as any).behaviors;
             Object.defineProperty(klass.prototype, "behaviors", { get: function() {
                 return behaviors;
             } });
 
         }
         if (register) {
-            Polymer(klass);
+            customElements.define(name, klass);
         }
         return klass;
     }
@@ -158,15 +160,15 @@ export function component(name: string, extendsTag?: string, register?: boolean)
 
 export function extend(tagName: string): ClassDecorator {
     return function(klass) {
-        klass.extends = tagName;
+        (klass as any).extends = tagName;
         return klass;
     }
 }
 
 export function behavior(behavior): ClassDecorator {
     return (klass) => {
-        klass.behaviors = klass.behaviors || [];
-        klass.behaviors.push(behavior);
+        (klass as any).behaviors = (klass as any).behaviors || [];
+        (klass as any).behaviors.push(behavior);
     }
 }
 
@@ -216,10 +218,10 @@ export function observe(observedProps: string) {
 }
 
 export function listen(eventName: string) {
-	return (target: Element, propertyKey: string) => {
-		target.listeners = target.listeners || {};
-		target.listeners[eventName] = propertyKey;
-	}
+    return (target: Element, propertyKey: string) => {
+        target.listeners = target.listeners || {};
+        target.listeners[eventName] = propertyKey;
+    }
 }
 
 export function computed(args?: Property): MethodDecorator;
