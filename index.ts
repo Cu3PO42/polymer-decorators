@@ -8,6 +8,8 @@ export declare class PolymerBase extends HTMLElement implements Element {
    shadyRoot:HTMLElement;
    style:CSSStyleDeclaration;
    customStyle:{[property:string]:string;};
+   extends?:Object[];
+   behaviors?:Object[];
 
    arrayDelete(path: string, item: string|any):any;
    async(callback: Function, waitTime?: number):any;
@@ -46,11 +48,11 @@ export declare class PolymerBase extends HTMLElement implements Element {
    set(path: string, value: any, root?: Object):any;
    setScrollDirection(direction: string, node: HTMLElement):void;
    shift(path: string, value: any):any;
-   splice(path: string, start: number, deleteCount: number, ...items):any;
+   splice(path: string, start: number, deleteCount: number, ...items: any[]):any;
    toggleAttribute(name: string, bool: boolean, node?: HTMLElement):void;
    toggleClass(name: string, bool: boolean, node?: HTMLElement):void;
    transform(transform: string, node?: HTMLElement):void;
-   translate3d(x, y, z, node?: HTMLElement):void;
+   translate3d(x: string, y: string, z: string, node?: HTMLElement):void;
    unlinkPaths(path: string):void;
    unshift(path: string, value: any):any;
    updateStyles(): void;
@@ -62,7 +64,7 @@ export interface dom
 {
   (node: HTMLElement): HTMLElement;
   (node: PolymerBase): HTMLElement;
-  flush();
+  flush(): any;
 }
 
 // options for the fire method
@@ -75,13 +77,13 @@ export interface FireOptions
 
 // members that can be optionally implemented in an element
 export interface Element {
-  properties?: Object;
-  listeners?: Object;
+  properties?: {[key:string]: Property};
+    listeners?: {[key: string]: any};
   behaviors?: Object[];
   observers?: String[];
 
   // lifecycle
-  factoryImpl?(...args): void;
+  factoryImpl?(...args: any[]): void;
   ready?(): void;
   created?(): void;
   attached?(): void;
@@ -90,6 +92,7 @@ export interface Element {
 
   //
   prototype?: Object;
+  [key: string]: any;
 }
 
 export interface Property {
@@ -123,10 +126,10 @@ export function component(name: string, extendsTag?: string, register?: boolean)
 
     return function (klass) {
         if (extendsTag === undefined) {
-            extendsTag = klass.extends;
+            extendsTag = (klass as any).extends;
         }
-        if (klass.extends !== undefined) {
-            delete klass.extends;
+        if ((klass as any).extends !== undefined) {
+            delete (klass as any).extends;
         }
         if (klass.prototype.beforeRegister !== undefined) {
             var beforeRegister = klass.prototype.beforeRegister;
@@ -141,16 +144,16 @@ export function component(name: string, extendsTag?: string, register?: boolean)
                 this.extends = extendsTag;
             }
         }
-        var behaviors = klass.behaviors;
+        var behaviors = (klass as any).behaviors;
         if (behaviors !== undefined) {
-            delete klass.behaviors;
+            delete (klass as any).behaviors;
             Object.defineProperty(klass.prototype, "behaviors", { get: function() {
                 return behaviors;
             } });
 
         }
         if (register) {
-            Polymer(klass);
+            customElements.define(name, klass);
         }
         return klass;
     }
@@ -158,22 +161,22 @@ export function component(name: string, extendsTag?: string, register?: boolean)
 
 export function extend(tagName: string): ClassDecorator {
     return function(klass) {
-        klass.extends = tagName;
+        (klass as any).extends = tagName;
         return klass;
     }
 }
 
-export function behavior(behavior): ClassDecorator {
+export function behavior(behavior: string): ClassDecorator {
     return (klass) => {
-        klass.behaviors = klass.behaviors || [];
-        klass.behaviors.push(behavior);
+        (klass as any).behaviors = (klass as any).behaviors || [];
+        (klass as any).behaviors.push(behavior);
     }
 }
 
 export function property(args?: Property): PropertyDecorator;
 export function property(target: Object, key: string | symbol): void;
 export function property(first?: any, second?: any): any {
-    var args;
+    var args: {[key: string]: any};
     var isGenerator = false;
 
     if (second === undefined) {
@@ -186,8 +189,8 @@ export function property(first?: any, second?: any): any {
     function decorate(target: any, key: string): void {
         if (Reflect.hasMetadata("design:type", target, key))
             args.type = Reflect.getMetadata("design:type", target,key);
-        target.properties = target.properties || {};
-        target.properties[key] = Object.assign(args, target.properties[key] || {});
+        target.constructor.properties = target.constructor.properties || {};
+        target.constructor.properties[key] = (Object as any).assign(args, target.constructor.properties[key] || {});
     };
 
     if (isGenerator) {
@@ -208,24 +211,27 @@ export function observe(observedProps: string) {
    else {
       // observing single property
       return (target: Element, observerName: string) => {
-         target.properties = target.properties || {};
-         target.properties[observedProps] = target.properties[observedProps] || {};
-         target.properties[observedProps].observer = observerName;
+         const c = target.constructor as Element;
+         c.properties = c.properties || {};
+         c.properties[observedProps] = c.properties[observedProps] || {};
+         c.properties[observedProps].observer = observerName;
       }
    }
 }
 
 export function listen(eventName: string) {
-	return (target: Element, propertyKey: string) => {
-		target.listeners = target.listeners || {};
-		target.listeners[eventName] = propertyKey;
-	}
+    return (target: Element, propertyKey: string) => {
+        const c = target.constructor as Element;
+        c.listeners = c.listeners || {};
+        c.listeners[eventName] = propertyKey;
+    }
 }
 
 export function computed(args?: Property): MethodDecorator;
 export function computed(target: Element, computedFuncName: string): void;
 export function computed(first?: any, second?: any): any {
-    var args;
+    var args: {[key: string]: any};
+
     var isGenerator = false;
 
     if (second === undefined) {
@@ -234,7 +240,8 @@ export function computed(first?: any, second?: any): any {
     }
 
     function decorate(target: Element, computedFuncName: string) {
-        target.properties = target.properties || {};
+        const c = target.constructor as Element
+        c.properties = c.properties || {};
         args = args || {};
         if (Reflect.hasMetadata("design:returntype", target, computedFuncName))
             args.type = Reflect.getMetadata("design:returntype", target, computedFuncName);
@@ -244,13 +251,13 @@ export function computed(first?: any, second?: any): any {
         var end = funcText.indexOf(")");
         var propertiesList = funcText.substring(start+1,end);
         args["computed"] = getterName + "(" + propertiesList + ")";
-        target.properties[computedFuncName] = args;
+        c.properties[computedFuncName] = args;
         target[getterName] = target[computedFuncName];
    }
 
    if (isGenerator) {
        return decorate;
    } else {
-       return decorate(first, second);
+       return decorate(first as Element, second);
    }
 }
