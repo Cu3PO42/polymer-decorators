@@ -72,8 +72,8 @@ function property(first, second) {
     function decorate(target, key) {
         if (Reflect.hasMetadata("design:type", target, key))
             args.type = Reflect.getMetadata("design:type", target, key);
-        target.properties = target.properties || {};
-        target.properties[key] = Object.assign(args, target.properties[key] || {});
+        target.constructor.properties = target.constructor.properties || {};
+        target.constructor.properties[key] = Object.assign(args, target.constructor.properties[key] || {});
     }
     ;
     if (isGenerator) {
@@ -93,17 +93,19 @@ function observe(observedProps) {
     }
     else {
         return function (target, observerName) {
-            target.properties = target.properties || {};
-            target.properties[observedProps] = target.properties[observedProps] || {};
-            target.properties[observedProps].observer = observerName;
+            var c = target.constructor;
+            c.properties = c.properties || {};
+            c.properties[observedProps] = c.properties[observedProps] || {};
+            c.properties[observedProps].observer = observerName;
         };
     }
 }
 exports.observe = observe;
 function listen(eventName) {
     return function (target, propertyKey) {
-        target.listeners = target.listeners || {};
-        target.listeners[eventName] = propertyKey;
+        var c = target.constructor;
+        c.listeners = c.listeners || {};
+        c.listeners[eventName] = propertyKey;
     };
 }
 exports.listen = listen;
@@ -115,7 +117,8 @@ function computed(first, second) {
         isGenerator = true;
     }
     function decorate(target, computedFuncName) {
-        target.properties = target.properties || {};
+        var c = target.constructor;
+        c.properties = c.properties || {};
         args = args || {};
         if (Reflect.hasMetadata("design:returntype", target, computedFuncName))
             args.type = Reflect.getMetadata("design:returntype", target, computedFuncName);
@@ -125,7 +128,7 @@ function computed(first, second) {
         var end = funcText.indexOf(")");
         var propertiesList = funcText.substring(start + 1, end);
         args["computed"] = getterName + "(" + propertiesList + ")";
-        target.properties[computedFuncName] = args;
+        c.properties[computedFuncName] = args;
         target[getterName] = target[computedFuncName];
     }
     if (isGenerator) {

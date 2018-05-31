@@ -51,7 +51,7 @@ export declare class PolymerBase extends HTMLElement implements Element {
     toggleAttribute(name: string, bool: boolean, node?: HTMLElement): void;
     toggleClass(name: string, bool: boolean, node?: HTMLElement): void;
     transform(transform: string, node?: HTMLElement): void;
-    translate3d(x: any, y: any, z: any, node?: HTMLElement): void;
+    translate3d(x: string, y: string, z: string, node?: HTMLElement): void;
     unlinkPaths(path: string): void;
     unshift(path: string, value: any): any;
     updateStyles(): void;
@@ -68,8 +68,12 @@ export interface FireOptions {
     cancelable?: boolean;
 }
 export interface Element {
-    properties?: Object;
-    listeners?: Object;
+    properties?: {
+        [key: string]: Property;
+    };
+    listeners?: {
+        [key: string]: any;
+    };
     behaviors?: Object[];
     observers?: String[];
     factoryImpl?(...args: any[]): void;
@@ -79,6 +83,7 @@ export interface Element {
     detached?(): void;
     attributeChanged?(attrName: string, oldVal: any, newVal: any): void;
     prototype?: Object;
+    [key: string]: any;
 }
 export interface Property {
     name?: string;
@@ -92,7 +97,7 @@ export interface Property {
 }
 export declare function component(name: string, extendsTag?: string, register?: boolean): ClassDecorator;
 export declare function extend(tagName: string): ClassDecorator;
-export declare function behavior(behavior: any): ClassDecorator;
+export declare function behavior(behavior: string): ClassDecorator;
 export declare function property(args?: Property): PropertyDecorator;
 export declare function property(target: Object, key: string | symbol): void;
 export declare function observe(observedProps: string): (target: Element, observerFuncName: string) => void;
